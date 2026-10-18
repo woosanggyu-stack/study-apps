@@ -56,6 +56,9 @@ def call_gemini(prompt):
     result = resp.json()
     if 'candidates' in result:
         return result['candidates'][0]['content']['parts'][0]['text']
+    err = result.get('error', result) if isinstance(result, dict) else result
+    msg = err.get('message', err) if isinstance(err, dict) else err
+    st.session_state['last_api_error'] = f"HTTP {resp.status_code}: {str(msg)[:300]}"
     return None
 
 
@@ -179,7 +182,7 @@ Always structure your response exactly like this:
 
                 st.session_state.messages.append({"role": "assistant", "content": ans_text})
             else:
-                st.error("API Error: Check your API Key or Model Name.")
+                st.error(f"API Error: Check your API Key or Model Name. ({st.session_state.get('last_api_error', '')})")
 
         except Exception as e:
             st.error(f"System Error: {e}")
@@ -221,7 +224,7 @@ with tab2:
             st.session_state.dialogue_audio = audio_list
             st.session_state.dialogue_situation = selected
         else:
-            st.error("Failed to generate dialogue. Please try again.")
+            st.error(f"Failed to generate dialogue. Please try again. ({st.session_state.get('last_api_error', '')})")
 
     if st.session_state.dialogue_lines:
         st.markdown(f"### 📍 {st.session_state.dialogue_situation}")

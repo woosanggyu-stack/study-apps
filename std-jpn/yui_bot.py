@@ -56,6 +56,9 @@ def call_gemini(prompt):
     result = resp.json()
     if 'candidates' in result:
         return result['candidates'][0]['content']['parts'][0]['text']
+    err = result.get('error', result) if isinstance(result, dict) else result
+    msg = err.get('message', err) if isinstance(err, dict) else err
+    st.session_state['last_api_error'] = f"HTTP {resp.status_code}: {str(msg)[:300]}"
     return None
 
 
@@ -179,7 +182,7 @@ with tab1:
 
                 st.session_state.messages.append({"role": "assistant", "content": ans_text})
             else:
-                st.error("API 에러가 발생했습니다.")
+                st.error(f"API 에러가 발생했습니다. ({st.session_state.get('last_api_error', '')})")
 
         except Exception as e:
             st.error(f"시스템 에러: {e}")
@@ -221,7 +224,7 @@ with tab2:
             st.session_state.dialogue_audio = audio_list
             st.session_state.dialogue_situation = selected
         else:
-            st.error("대화 생성에 실패했습니다. 다시 시도해 주세요.")
+            st.error(f"대화 생성에 실패했습니다. 다시 시도해 주세요. ({st.session_state.get('last_api_error', '')})")
 
     if st.session_state.dialogue_lines:
         st.markdown(f"### 📍 {st.session_state.dialogue_situation}")
