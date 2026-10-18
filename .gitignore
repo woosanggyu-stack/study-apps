@@ -1,0 +1,14 @@
+# 비밀 키 / 로컬 데이터는 절대 올리지 않는다
+.streamlit/secrets.toml
+.env
+*.key
+.api_key
+*키*.txt
+venv/
+__pycache__/
+*.pyc
+*.bak
+# 개인 단어장 (클라우드에서는 어차피 임시 저장)
+*_vocabulary.csv
+my_words.csv
+jp_vocab.csv
